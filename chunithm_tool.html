@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CHUNITHM Rating 抓取工具</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    button {
+      margin-top: 10px;
+      padding: 5px 10px;
+    }
+    input {
+      width: 100%;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <h2>CHUNITHM Rating 抓取</h2>
+  <p>點擊下方按鈕即可抓取 B20 + B30 Rating 資料：</p>
+  <button onclick="fetchData()">抓取並顯示</button>
+
+  <h3>結果：</h3>
+  <input id="result" readonly>
+  <button onclick="copyResult()">複製結果</button>
+
+  <script>
+    function fetchData() {
+      const newURL = 'https://chunithm-net-eng.com/mobile/rating/';
+      const oldURL = 'https://chunithm-net-eng.com/mobile/rating/old/';
+
+      Promise.all([
+        fetch(newURL).then(r => r.text()),
+        fetch(oldURL).then(r => r.text())
+      ]).then(([newText, oldText]) => {
+        const parser = new DOMParser();
+        const docNew = parser.parseFromString(newText, 'text/html');
+        const docOld = parser.parseFromString(oldText, 'text/html');
+
+        const newList = [...docNew.querySelectorAll('.w_450.m_15.p_r_10.p_b_5.p_l_10.t_l.f_0')].slice(0, 20);
+        const oldList = [...docOld.querySelectorAll('.w_450.m_15.p_r_10.p_b_5.p_l_10.t_l.f_0')].slice(0, 30);
+
+        const extractRating = el => {
+          const match = el.textContent.match(/(\d+\.\d{2})/);
+          return match ? parseFloat(match[1]) : 0;
+        };
+
+        const newRating = newList.map(extractRating).reduce((a, b) => a + b, 0);
+        const oldRating = oldList.map(extractRating).reduce((a, b) => a + b, 0);
+        const total = (newRating + oldRating).toFixed(2);
+
+        const resultText = `Current B20: ${newRating.toFixed(2)} + Old B30: ${oldRating.toFixed(2)} = Rating: ${total}`;
+        document.getElementById('result').value = resultText;
+      }).catch(err => {
+        alert('抓取失敗：請確認你已登入 CHUNITHM 網站，並允許跨域。');
+        console.error(err);
+      });
+    }
+
+    function copyResult() {
+      const result = document.getElementById('result');
+      result.select();
+      document.execCommand('copy');
+      alert('已複製到剪貼簿！');
+    }
+  </script>
+</body>
+</html>
