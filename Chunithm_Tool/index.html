@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CHUNITHM Rating Tool</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f2f2f2;
+    }
+    textarea {
+      width: 100%;
+      height: 100px;
+      font-size: 14px;
+      padding: 10px;
+    }
+    button {
+      margin: 5px 0;
+      padding: 10px 20px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .section {
+      margin-bottom: 30px;
+    }
+    .output {
+      background: white;
+      padding: 10px;
+      border: 1px solid #ccc;
+      margin-top: 5px;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🎵 Chunithm Rating Tool</h1>
+
+  <div class="section">
+    <h3>Step 1: 打開 <a href="https://chunithm-net-eng.com/mobile/home/" target="_blank">CHUNITHM 官方網站</a></h3>
+    <p>登入後再點下面的按鈕進行資料擷取。</p>
+    <button onclick="runScraper()">擷取 B20 + B30</button>
+  </div>
+
+  <div class="section">
+    <h3>Step 2: 擷取結果</h3>
+    <div><strong>B20 (新版本):</strong></div>
+    <div id="b20-output" class="output"></div>
+    <button onclick="copyToClipboard('b20-output')">複製 B20</button>
+
+    <div style="margin-top:20px;"><strong>B30 (舊版本):</strong></div>
+    <div id="b30-output" class="output"></div>
+    <button onclick="copyToClipboard('b30-output')">複製 B30</button>
+  </div>
+
+  <script>
+    function runScraper() {
+      const script = document.createElement('script');
+      script.src = 'https://dogeon188.github.io/chuni-tools/scripts/chuni-tools.js?t=' + Math.floor(Date.now() / 60000);
+      script.onload = () => {
+        // 延遲一下讓他跑完
+        setTimeout(() => {
+          try {
+            const b20 = localStorage.getItem('chuniToolsCurrent') || '無法取得 B20';
+            const b30 = localStorage.getItem('chuniToolsOld') || '無法取得 B30';
+            document.getElementById('b20-output').innerText = b20;
+            document.getElementById('b30-output').innerText = b30;
+          } catch (e) {
+            alert('擷取失敗，請確認是否登入且開啟正確頁面');
+          }
+        }, 1000);
+      };
+      document.body.appendChild(script);
+    }
+
+    function copyToClipboard(id) {
+      const el = document.getElementById(id);
+      navigator.clipboard.writeText(el.innerText)
+        .then(() => alert("已複製到剪貼簿"))
+        .catch(() => alert("複製失敗"));
+    }
+  </script>
+
+</body>
+</html>
